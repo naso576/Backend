@@ -1,28 +1,24 @@
-// api/index.js - Vercel backend entry
+require("dotenv").config();
 const mongoose = require("mongoose");
-const app = require("../App");
+const dotenv = require("dotenv");
+dotenv.config({ path: "./config.env" });
+console.log(process.env.NODE_ENV);
+const   app = require("./App");
+const db= process.env.DB;
 
-let isConnected = false; // Prevent multiple DB connections in serverless
 
-async function connectToDatabase() {
-  if (isConnected) {
-    return;
-  }
+mongoose
+  .connect(db, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  }).then(() => {
+    console.log("DB connection successful");
+  })
+  .catch((err) => {
+    console.error("DB connection error:", err);
+  });
 
-  try {
-    await mongoose.connect(process.env.DB, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    isConnected = true;
-    console.log("✅ DB connection successful");
-  } catch (err) {
-    console.error("❌ DB connection error:", err);
-  }
-}
-
-// Vercel serverless function handler
-module.exports = async (req, res) => {
-  await connectToDatabase();
-  return app(req, res); // Pass request to Express
-};
+  const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
