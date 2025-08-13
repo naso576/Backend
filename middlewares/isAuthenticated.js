@@ -7,8 +7,8 @@ const isAuthenticated = catchAsync(async (req, res, next) => {
     // 1) Getting token and check if it's there
     let token;
    
-    if (req.cookies?.token) {
-        token = req.cookies.token;
+    if (req.cookies?.jwt) {
+        token = req.cookies.jwt;
     } else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         token = req.headers.authorization.split(' ')[1];
     }
