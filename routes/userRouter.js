@@ -16,4 +16,6 @@ router.post('/login', login);
 
 router.post('/logout', logout);
 
+router.get('/verify-token', isAuthenticated);
+
 module.exports = router;    
