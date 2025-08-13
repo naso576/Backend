@@ -204,7 +204,7 @@ exports.login= catchAsync(async(req,res,next)=>{
     // if(!findUser.isVerified){
     //     return next(new AppError('Your account is not verified. Please verify your email first.', 403));
     // }
-    res.cookie('jwt', token, streamToken,cookieOptions);
+    res.cookie('jwt', token,cookieOptions);
     createSendToken(findUser,200,res,"You have logged in successfully.");
    
 }   
