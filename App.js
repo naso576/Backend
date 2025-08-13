@@ -18,10 +18,7 @@ const PORT = process.env.PORT || 3001;
 
 // Middleware
 
-app.use(cors({origin: ["http://localhost:3000"], credentials: true}));
-app.use(express.json({limit: '10kb'}));
-app.use(cookieParser());
-
+// app.use(cors({origin: ["http://localhost:3000"], credentials: true}));
 app.use((req, res, next) => {
   const allowedOrigin = 'https://consultation-ochre.vercel.app';
   res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
@@ -36,6 +33,8 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(express.json({limit: '10kb'}));
+app.use(cookieParser());
 // Routes
 app.use('/api/v1/users', userRouter);
 
