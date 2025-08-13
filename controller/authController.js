@@ -197,8 +197,8 @@ exports.login= catchAsync(async(req,res,next)=>{
         httpOnly: true,
         // secure: process.env.NODE_ENV === 'production', // Set to true in production 
         // sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax' // Allow cross-site cookies in production
-        secure: false, // Set to true in production
-        sameSite: 'Lax' // Allow cross-site cookies in production
+        secure: process.env.NODE_ENV=== 'production', // Set to true in production
+        sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax' // Allow cross-site cookies in production
     };
 
     // if(!findUser.isVerified){
@@ -214,8 +214,8 @@ exports.logout = (req, res) => {
     res.cookie('jwt', 'loggedout', {
         expires: new Date(Date.now() + 1000), // Set cookie to expire immediately
         httpOnly: true,
-        secure: false, // Set to true in production
-        sameSite: 'Lax' // Allow cross-site cookies in production
+        secure: process.env.NODE_ENV === 'production' , // Set to true in production
+        sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax' // Allow cross-site cookies in production
     });
     res.status(200).json({
         status: 'success',
