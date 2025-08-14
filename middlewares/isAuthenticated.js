@@ -6,7 +6,7 @@ const user= require('../model/userModel');
 const isAuthenticated = catchAsync(async (req, res, next) => {
     // 1) Getting token and check if it's there
     let token;
-   
+    console.log('coockies',req)
     if (req.cookies?.jwt) {
         token = req.cookies.jwt;
     } else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
@@ -29,6 +29,9 @@ const isAuthenticated = catchAsync(async (req, res, next) => {
 
     // 3) Check if user still exists
     const currentUser = await user.findById(decoded._id);
+    console.log('currentuser', decoded, currentUser
+
+    )
     if (!currentUser) {
         return next(new AppError('The user belonging to this token does no longer exist.', 401));
     }
