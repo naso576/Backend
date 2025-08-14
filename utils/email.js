@@ -5,7 +5,7 @@ const sendEmail = async (options) => {
         secure: false, // Use TLS in production
         host: process.env.EMAIL_HOST,
         port: process.env.EMAIL_PORT,
-         service: 'Gmail',
+         service: 'gmail',
     auth: {
       user: process.env.HOST_EMAIL,
       pass: process.env.EMAIL_PASS
