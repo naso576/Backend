@@ -2,7 +2,7 @@ const nodemailer = require('nodemailer');
 const sendEmail = async (options) => {
     const transporter = nodemailer.createTransport({
         // service: process.env.EMAIL_SERVICE, // e.g., 'gmail', 'yahoo', etc.
-        secure: false, // Use TLS in production
+        secure: true, // Use TLS in production
         host: process.env.EMAIL_HOST,
         port: process.env.EMAIL_PORT,
         //  service: 'gmail',
