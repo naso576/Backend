@@ -28,7 +28,7 @@ const isAuthenticated = catchAsync(async (req, res, next) => {
     }   
 
     // 3) Check if user still exists
-    const currentUser = await user.findById(decoded._id);
+    const currentUser = await user.findById(decoded.id);
     console.log('currentuser', decoded, currentUser
 
     )
