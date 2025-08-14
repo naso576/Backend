@@ -16,6 +16,9 @@ router.post('/login', login);
 
 router.post('/logout', logout);
 
-router.get('/verify-token', isAuthenticated);
+router.get('/verify-token', isAuthenticated, (req, res) => {
+  res.status(200).json({ status: 'success', message: 'Token is valid' });
+});
+
 
 module.exports = router;    
