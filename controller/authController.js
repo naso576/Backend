@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const generateOtp = require('../utils/generateOTP');
 const sendEmail = require('../utils/email');
 const {StreamChat} = require("stream-chat");
-
+const bcrypt = require('bcryptjs');
 
 const streamClient = StreamChat.getInstance(
   process.env.STREAM_API_KEY,
@@ -222,3 +222,97 @@ exports.logout = (req, res) => {
         message: 'Logged out successfully'
     });
 };  
+
+
+
+exports.changePassword = catchAsync(async (req, res, next) => {
+  // Ensure user is authenticated (req.user is set by protect middleware)
+  const userId = req.user.id; 
+  const { oldPassword, newPassword, confirmPassword } = req.body;
+
+  // 1️⃣ Validate inputs
+  if (!oldPassword || !newPassword || !confirmPassword) {
+    return res.status(400).json({
+      status: 'fail',
+      message: 'Please provide old password, new password, and confirm password',
+    });
+  }
+
+  if (newPassword !== confirmPassword) {
+    return res.status(400).json({
+      status: 'fail',
+      message: 'New password and confirm password do not match',
+    });
+  }
+
+  // 2️⃣ Get current user with password
+  const findUser = await user.findById(userId).select('+password');
+  if (!findUser) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'User not found',
+    });
+  }
+
+  // 3️⃣ Check if old password is correct
+  const isOldPasswordCorrect = await findUser.correctPassword(oldPassword, findUser.password);
+  if (!isOldPasswordCorrect) {
+    return res.status(401).json({
+      status: 'fail',
+      message: 'Old password is incorrect',
+    });
+  }
+
+  // 4️⃣ Update password (pre-save middleware will hash automatically)
+  findUser.password = newPassword;
+  findUser.passwordConfirm = confirmPassword; // required for schema validation
+  findUser.passwordChangedAt = Date.now() - 1000; // forces JWT to be invalidated
+  await findUser.save();
+
+  // 5️⃣ Success response (optionally re-login the user and set JWT cookie here)
+  res.status(200).json({
+    status: 'success',
+    message: 'Password changed successfully',
+  });
+});
+
+
+exports.protect = async (req, res, next) => {
+  // Get token from headers/cookies
+  let token;
+//   if (req.headers.authorization?.startsWith('Bearer')) {
+//     token = req.headers.authorization.split(' ')[1];
+//   }
+token = req.cookies.jwt;
+  if (!token) {
+    return res.status(401).json({
+      status: 'fail',
+      message: 'You are not logged in! Please log in to get access.'
+    });
+  }
+
+  // Verify token
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+  // Check if user still exists
+  const currentUser = await user.findById(decoded.id);
+  if (!currentUser) {
+    return res.status(401).json({
+      status: 'fail',
+      message: 'The user belonging to this token no longer exists.'
+    });
+  }
+
+  // Check if password changed after token was issued
+  if (currentUser.changedPasswordAfter(decoded.iat)) {
+    return res.status(401).json({
+      status: 'fail',
+      message: 'User recently changed password. Please log in again.'
+    });
+  }
+
+  // Grant access
+  req.user = currentUser;
+  next();
+};
+

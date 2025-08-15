@@ -1,5 +1,5 @@
 const express = require('express');
-const { signup, verifyOtp, login, logout , resendOtp} = require('../controller/authController');
+const { signup, verifyOtp, login, logout , resendOtp, changePassword, protect} = require('../controller/authController');
 const isAuthenticated = require('../middlewares/isAuthenticated');
 
 const router = express.Router();
@@ -20,5 +20,6 @@ router.get('/verify-token', isAuthenticated, (req, res) => {
   res.status(200).json({ status: 'success', message: 'Token is valid' });
 });
 
+router.post('/change-password', protect,changePassword);
 
 module.exports = router;    
