@@ -47,7 +47,8 @@ const userSchema = new mongoose.Schema({
     emailVerificationExpires: Date, 
     emailVerified: {
       type: Boolean, default: false
-    }   
+    }   ,
+    phone: Number
 }, {
   timestamps: true
 });
@@ -63,6 +64,16 @@ userSchema.pre('save', async function (next) {
 userSchema.methods.correctPassword = async function (password, userPassword) {
   return await bcrypt.compare(password, userPassword);
 };
+
+userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
+  if (this.passwordChangedAt) {
+    const changedTimestamp = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
+    return JWTTimestamp < changedTimestamp; // true if password changed after JWT was issued
+  }
+  // False means NOT changed
+  return false;
+};
+
 const User = mongoose.model('User', userSchema);
 module.exports = User;
 module.exports.userSchema = userSchema;
