@@ -6,6 +6,7 @@ const generateOtp = require('../utils/generateOTP');
 const sendEmail = require('../utils/email');
 const {StreamChat} = require("stream-chat");
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
 const streamClient = StreamChat.getInstance(
   process.env.STREAM_API_KEY,
@@ -316,3 +317,81 @@ token = req.cookies.jwt;
   next();
 };
 
+
+exports.forgetPassword = catchAsync(async (req, res, next) => {
+  const { email } = req.body;
+  const findUser = await user.findOne({ email });
+
+  if (!findUser) {
+    return next(new AppError('There is no user with that email address.', 404));
+  } 
+
+  // create reset token (plain token sent via email)
+  const resetToken = crypto.randomBytes(32).toString('hex');
+  const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+
+  const resetTokenExpires = Date.now() + 10 * 60 * 1000; // Token valid for 10 minutes
+  findUser.passwordResetToken = hashedToken;
+  findUser.passwordResetExpires = resetTokenExpires;
+  await findUser.save({ validateBeforeSave: false });
+
+  // build reset URL (client handles the route /reset-password/:token)
+  const resetURL = `${process.env.CLIENT_URL || 'http://localhost:3000'}/reset-password/${resetToken}`;
+
+  try {
+    await sendEmail({
+      email: findUser.email,
+      subject: 'Your password reset link (valid for 10 minutes)',
+      html: `<p>Click the link to reset your password:</p><p><a href="${resetURL}">${resetURL}</a></p>`
+    });
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Password reset link sent to email!'
+    });
+  } catch (err) {
+    // rollback on email failure
+    findUser.passwordResetToken = undefined;
+    findUser.passwordResetExpires = undefined;
+    await findUser.save({ validateBeforeSave: false });
+    return next(new AppError('There was an error sending the email. Try again later!', 500));
+  }
+});
+ 
+// new controller to handle reset
+exports.resetPassword = catchAsync(async (req, res, next) => {
+  const token = req.params.token;
+  if (!token) return next(new AppError('Token is missing', 400));
+
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+  const findUser = await user.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpires: { $gt: Date.now() }
+  });
+
+  if (!findUser) {
+    return next(new AppError('Token is invalid or has expired', 400));
+  }
+ console.log('body', req.body);
+  const { password, confirmPassword } = req.body;
+ 
+  if (!password || !confirmPassword) {
+    return next(new AppError('Please provide password and confirmPassword', 400));
+  }
+  if (password !== confirmPassword) {
+    return next(new AppError('Passwords do not match', 400));
+  }
+
+  // set the new password and clear reset fields
+  findUser.password = password;
+  findUser.passwordConfirm = confirmPassword;
+  findUser.passwordResetToken = undefined;
+  findUser.passwordResetExpires = undefined;
+  findUser.passwordChangedAt = Date.now() - 1000;
+  await findUser.save(); // runs validators and password hashing middleware
+
+  // optionally log the user in after reset
+  createSendToken(findUser, 200, res, 'Password reset successful.');
+});
+// ...existing code...

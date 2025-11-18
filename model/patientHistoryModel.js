@@ -90,7 +90,7 @@ const mongoose = require('mongoose');
           neurologicalExamination: String,
           clinicalDiagnosis: String,
           investigationsRequired : Array,
-
+          nextVisitDate : String,
 
       },
       { timestamps: true }

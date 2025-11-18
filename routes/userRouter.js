@@ -1,5 +1,5 @@
 const express = require('express');
-const { signup, verifyOtp, login, logout , resendOtp, changePassword, protect} = require('../controller/authController');
+const { signup, verifyOtp, login, logout , resendOtp, changePassword,resetPassword, protect, forgetPassword} = require('../controller/authController');
 const isAuthenticated = require('../middlewares/isAuthenticated');
 
 const router = express.Router();
@@ -21,5 +21,11 @@ router.get('/verify-token', isAuthenticated, (req, res) => {
 });
 
 router.post('/change-password', protect,changePassword);
+
+router.post('/forgot-password',forgetPassword);
+
+// ...existing code...
+// add this GET route so visiting /reset-password/:token in browser returns a form
+router.post('/reset-password/:token', resetPassword);
 
 module.exports = router;    
