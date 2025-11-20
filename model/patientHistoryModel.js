@@ -102,7 +102,7 @@ const mongoose = require('mongoose');
       return object;
     });
   
-    const history1 = mongoose.model("patient_profile_comorbidities_datas", schema);
+    const history1 = mongoose.model("patient_profile_comorbidities_datas", historySchema);
    module.exports = history1;
    module.exports.historySchema= historySchema;
  
