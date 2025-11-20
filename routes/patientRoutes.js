@@ -1,5 +1,6 @@
 
     const patients = require("../controller/patientController");
+    const patientHistory = require("../controller/patientHistoryController");
     
   
     var router = require("express").Router();
@@ -25,6 +26,12 @@
   
     // Create a new Tutorial
     router.delete("/", patients.deleteAll);
+
+    router.post('/createPatientHistory', patientHistory.createHistory);
+
+    router.get('/patientHistory/:profileNo', patientHistory.getHistoryByProfileNo);
+    router.put('/patientHistory/:profileNo', patientHistory.updateHistoryByProfileNo);
+    router.delete('/patientHistory/:profileNo', patientHistory.deleteHistoryByProfileNo);
 
 
     module.exports = router;    
