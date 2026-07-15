@@ -20,7 +20,7 @@ const PORT = process.env.PORT || 3001;
 
 // app.use(cors({origin: ["http://localhost:3000"], credentials: true}));
 app.use((req, res, next) => {
-  const allowedOrigin = 'https://dr-naveen-consultation.vercel.app/';
+  const allowedOrigin = 'https://dr-naveen-consultation.vercel.app';
   res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
