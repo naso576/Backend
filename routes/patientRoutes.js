@@ -1,6 +1,7 @@
 
     const patients = require("../controller/patientController");
     const patientHistory = require("../controller/patientHistoryController");
+    const patientPrescription = require("../controller/patientPrescriptionController");
     
   
     var router = require("express").Router();
@@ -32,6 +33,9 @@
     router.get('/patientHistory/:profileNo', patientHistory.getHistoryByProfileNo);
     router.put('/patientHistory/:profileNo', patientHistory.updateHistoryByProfileNo);
     router.delete('/patientHistory/:profileNo', patientHistory.deleteHistoryByProfileNo);
+
+    router.post('/prescription', patientPrescription.upsertPrescription);
+    router.get('/prescription/:profileNo', patientPrescription.getPrescriptionByProfileNo);
 
 
     module.exports = router;    
